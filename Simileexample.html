@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Inspiring women through history example timeline</title>
+ <!--Hello! This page contains a mixture of HTML (to structure the page), CSS (to style it) and JavaScript (to make it interactive).  I've used comments (like this one) throughout to explain what various bits do to link in and load the data from a spreadsheet stored in Google Docs, link in external script files, setup and draw the timeline and map onto the screen.  I've also used comments (look for the word 'try') to point out areas where you can experiment with changing the values in various bits of script, saving and re-loading the page to start putting the basics of programming into action.  The bulk of the code comes from http://code.google.com/p/simile-widgets/wiki/Timeline_GettingStarted or from Brian Croxall's example.  -->
+ <!-- If you want to try changing the page, make a backup copy first so you can compare the two pages if you accidentally break something in the code. If you're on a Mac, TextEdit won't show you the raw code, you'll need to download another free tool like Smultron (http://sourceforge.net/projects/smultron/ for older Macs, http://www.peterborgapps.com/smultron/ for newer Macs) or TextWrangler (http://www.barebones.com/products/textwrangler/). Notepad will work on PCs, as will WordPad at a pinch but you can also try Notepad++ (http://notepad-plus-plus.org/) -->
+ <!-- If you want to try this code with your own spreadsheet, you can start by copying the one used in this example and putting your own values into the columns, or rename existing columns to match.  The names of columns are important because different bits of code use the names to identify specific bits of the rows of data.  You could also try changing the code to use your column names. -->
+ <!-- Ok, on with the code! -->
+
+<!-- The line below is your first bit of JavaScript. The <script></script> tags tell the browser we're not using HTML.  The 'src' bit tells the browser to import the code at that URL, which is the address of the JavaScript code on the SIMILE widgets site. -->
+<script src="http://api.simile-widgets.org/exhibit/2.2.0/exhibit-api.js" type="text/javascript"></script> 
+ 	
+<!-- The line below tells the browser to import a specific script that manages all the functions needed to build a timeline.  This makes them available for us to actually build the timeline view further down the page. -->
+<script src="http://api.simile-widgets.org/exhibit/2.2.0/extensions/time/time-extension.js"></script> 
+
+<!-- The line below tells the browser to import all the functions needed to build a map. SIMILE uses Google Maps, which needs an API key - a string of characters a bit like a password - to work.  You can get your own API key by visiting the APIs Console at https://code.google.com/apis/console and logging in with a Google Account. When you have a key, replace the current messy string after 'gmapkey=' with your own key. Make sure you don't accidentally over-write the quote marks at the end! -->
+<script src="http://api.simile-widgets.org/exhibit/2.2.0/extensions/map/map-extension.js?gmapkey=AIzaSyBc0Nd1kTvQ0o6jfK5LxYkZrqG_dKjOg_Q"></script>
+
+
+<!-- The lines below tell the browser where the spreadsheet that holds the data is online.  If you want to use your own spreadsheet, you need to change the ID between '/list/' and '/od6/'. To find the ID (AKA the key) for your spreadsheet, choose the 'Publish to the web' option in Google Docs, then select 'Get a link to the published data' with the option 'RSS' selected. Copy that link and look for the ID in the address e.g. in 
+https://spreadsheets.google.com/feeds/list/0AhekQVhIO1pLdDVjeEc1WVpIc19SZC1QVURobU1JUHc/od6/public/basic?alt=rss. Make sure you don't accidentally copy over other bits of the address when you swap the keys. -->
+<link 	rel="exhibit/data" 
+      	type="application/jsonp"
+      	href="http://spreadsheets.google.com/feeds/list/0AhekQVhIO1pLdDVjeEc1WVpIc19SZC1QVURobU1JUHc/od6/public/basic?alt=json-in-script"
+      	ex:converter="googleSpreadsheets" /> 
+	
+		
+<!-- Now we'll start building the timeline. All the bits above have given us the raw ingredients we need, but it's up to us to make something with them! -->
+<!-- If you're not sure how variables and functions work, now would be a good time to find out! You can also learn by changing values and seeing what happens if you don't mind that you'll sometimes break things. Don't forget to save different versions so you can go back and work out how to fix things. -->
+<!-- The code below calls a function that builds a timeline. There are JavaScript-style comments against specific points of interest -->
+<script>
+        function myTimelineConstructor(div, eventSource) {
+            var theme = Timeline.ClassicTheme.create();
+            theme.event.bubble.width = 500; /* This sets the width of the bubble - try making it really big or really small and clicking on timeline items to see what difference it makes */
+            theme.event.bubble.height = 300; /* Ditto! */
+            theme.ether.backgroundColors[1] = theme.ether.backgroundColors[0]; 
+            var d = Timeline.DateTime.parseGregorianDateTime("1650") /* This creates a variable 'd' and stores a calendar year in it. Try changing the year to see what difference it makes. */
+            var bandInfos = [
+			/* This tells the Timeline script to create one band of the timeline. The code then sets the starting values for the first timeline band (e.g. the top bar of the timeline).  The code block repeats and sets values once for each band of the timeline. We start with two, but you could have more - up to four bands in the current code.
+			For more options, see http://simile.mit.edu/wiki/Exhibit/2.0/Timeline_View and http://simile-widgets.org/wiki/Timeline_ThemeClass. Theme values? */
+                Timeline.createBandInfo({
+                    width:          "80%", /* This variable sets the relative percentage that this band will take up in the whole timeline e.g. 80% of 100%. */
+                    intervalUnit:   Timeline.DateTime.DECADE, /* This sets the basic unit in the first timeline band as a decade - try changing it to "millisecond", "second", "minute", "hour", "day", "week", "month", "year", "decade", "century", or "millennium" as might suit your data */
+                    intervalPixels: 65, /* This sets how many pixels wide the basic time period is - try changing it to something really big or really small and see what happens */
+                    eventSource:    eventSource,
+                    date:           d, /* this uses the value we gave the variable 'd' above */
+                    theme:          theme
+                }),
+                Timeline.createBandInfo({ /* This block controls the settings for the bottom band of the timeline. Try changing the values on the right-hand side to see what happens. */
+                    width:          "20%", 
+                    intervalUnit:   Timeline.DateTime.CENTURY, 
+                    intervalPixels: 100,
+                    eventSource:    eventSource,
+                    date:           d,
+                    overview:       true, 
+                    theme:          theme
+                })
+            ];
+			
+			
+		    // This bit makes the bands scroll in sync. Try commenting it out to see them scroll independently!
+		    bandInfos[1].syncWith = 0;
+		    bandInfos[1].highlight = true;
+        
+            
+            div.style.height = "400px";/* This field controls the height of the timeline - how would you make the timeline taller or shorter? */
+            return Timeline.create(div, bandInfos, Timeline.HORIZONTAL);
+        }
+    </script>
+
+<!-- This sets up the CSS (cascading style sheets) for the page. -->	
+<style>
+    body {
+	font-family: Trebuchet MS, Tahoma, Arial, Helvetica, sans serif;
+	font-size:   9pt;
+	margin:      3em;
+	background-color: #689AD3; /*--This is where you control the background color of the page. */
+	color:#000000;
+}
+      a {
+	  color: #6CA8A8;}  
+		table {
+            font-size: 100%;
+        }
+        div.a-lens {
+            width:   500px; 
+            padding: 0;
+            margin:  0;
+        }
+        img.photo {
+            float: right; /*-- Try changing this to get text to wrap around the image? Look at other examples */
+        }
+
+body,td,th {
+	color: #04356C;
+}
+a:link {
+	color: #1B50A7;
+}
+a:visited {
+	color: #1B50A7;
+}
+</style>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+
+<body>
+
+<h1>'Inspiring women through history' mapped across time and space</h1>
+
+<p>This timeline is populated dynamically with data served from a <a href="https://docs.google.com/spreadsheet/pub?key=0AhekQVhIO1pLdDVjeEc1WVpIc19SZC1QVURobU1JUHc&output=html" target="_blank">Google Spreadsheet</a>. You can <a href="https://docs.google.com/forms/d/16HAicl0D533cmGZQh3gt6941W0k-rcAw3r3KxBtPZCA/viewform">add new records about inspiring women in history yourself via this form</a>.  You can find women who could be listed from sites like <a href="http://www.womenaustralia.info/">the Australian Women's Register</a>, the <a href="http://adb.anu.edu.au/">The Australian Dictionary of Biography</a> (to start with). Tweet @mia_out if you have suggestions for other sites and I'll add them.</p>
+
+<!-- This assigns colours to particular disciplines on the timeline, and sets a default colour for disciplines that aren't listed. The colours were chosen at http://colorschemedesigner.com/#3B61Tw0w0w0w0
+It works with the code that lets the user select records for particular disciplines or countries. If you wanted to filter on different spreadsheet columns you could try swapping their names into the different places its references in the code on this page. -->
+<div ex:role="coder" ex:coderClass="Color" id="Discipline-colors">
+    <span ex:color="#FF9A00">Artist</span>
+    <span ex:color="BF8730">Astronomer</span>
+    <span ex:color="#A66400">Scientist</span>
+    <span ex:color="#FFB440">Writer</span>
+	<span ex:color="#00A876">Aviator</span>
+	<span ex:color="#207E62">Pirate</span>
+	<span ex:color="006D4C">Mathematician</span>
+	<span ex:color="35D4A4">Intellectual</span>
+    <span ex:color="#5FD4B1">Entertainer</span>
+    <span ex:color="#5FD4B1" ex:case="missing">Not Specified</span> </div><!-- If you haven't specified colors, then Exhibit defaults to its own scheme -->
+
+	<!-- This sets colours for different country names. Try changing the colours so that continents have similar colours e.g. reds in Europe, blues in North America, greens in Asia... -->
+    <!-- Try changing this to work for other fields in the spreadsheet -->
+<div ex:role="coder" ex:coderClass="Color" id="Country-colors">
+    <span ex:color="#DAA520">England</span>
+    <span ex:color="red">France</span>
+    <span ex:color="#556B2F">Germany</span>
+    <span ex:color="#00FFFF">United States of America</span>
+	<span ex:color="#8B4513">United Kingdom</span>
+	<span ex:color="#9400D3">Austria</span>
+	<span ex:color="black">Australia</span>
+	<span ex:color="#F272F4">Ireland</span>
+	<span ex:color="#8299FF">Italy</span>
+	<span ex:color="#4B6478">Netherlands</span>
+	<span ex:color="#FF3300">New Zealand</span>
+	<span ex:color="#006666">Poland</span>
+	<span ex:color="#FF9966">Spain</span>
+	<span ex:color="#33FF99">Switzerland</span>
+	<span ex:color="#26448C">Russia</span>
+    <span ex:color="#33E418">Scotland</span>
+    <span ex:color="#87CEFA" ex:case="missing">Not Specified</span> </div>
+
+	<!-- This creates a table that puts different elements in particular places on the page. Try changing the border value to 1 to see the different cells of the table -->
+<table width="100%" cellspacing="20" border="0"><tr valign="top">
+	<td>
+		<!-- Brian comment: Adding this line and the extra div layer allows you to choose between the following views. If you don't include it then you just get all the views on one page. -->
+		<!-- The next section sets up the Timeline view, using the variables set in the 'function myTimelineConstructor' bit above. -->
+		<!-- ex:start=".start" tells the timeline to look in the "start:date" column for when to create the event. How would you change this and the end:date variable below to use the death year in the spreadsheet instead of the birth year? -->
+		<!-- ex:end=".end" tells the timeline to look in the "end:date" field for when events end (IF they have duration. They don't need to.) -->
+		<!-- ex:colorKey=".Discipline" tells the timeline to colour events according to the "Discipline" field. -->
+		<!-- ex:colorCoder="Discipline-colors" setting tells the html to look to the colorCoder settings above that use the same element ID -->
+		<!-- ex:timelineConstructor="myTimelineConstructor" tells the timeline to use all the values set at the start to decide the timeline will look -->
+		
+		<div ex:role="viewPanel">
+			<div ex:role="view" 
+				 ex:viewClass="Timeline" 
+				 ex:start=".start" 
+				 ex:end=".end" 
+				 ex:colorKey=".Discipline" 
+				 ex:colorCoder="Discipline-colors" 
+				 ex:timelineConstructor="myTimelineConstructor">
+				 
+					<!-- Brian comment: Adding this one line moves us from ugly output when clicking on an event to the nice bubble. I'm pretty sure that I could use "class" to name the lens, in case I'd specified something in an earlier script for it.-->
+                 	<div ex:role="lens"> 
+						<!-- The lines below determine what information from the spreadsheet appears in the bubble and how that information gets formatted. Try updating it to include new fields from the spreadsheet, like the image source and link for further information -->
+						<b ex:content=".label"></b><p>
+						<img ex:src-content=".image"><p>
+						<span ex:content=".description"></span>
+						<i ex:content=".Country"></i></p> 
+					</div><!-- Brian comment: moved the lens here to be within the timeline view. This will allow me to have more than one view-->
+			</div> 
+		
+		<!--This instantiates the Map view.-->
+		<!-- ex:latlng=".birthplace_LatLng" tells the map which column in the spreadsheet has the location data in a format it can understand --> 
+		<!-- ex:center="37.160317,-96.943359" - try changing this to a different latitude and longitude - what happens? -->
+        <!-- ex:zoom="4" try changing this to a higher or lower value - what happens in the map view? -->
+		<div ex:role="view" 
+				     ex:viewClass="Map" 
+					 ex:label="Map"
+					 ex:latlng=".birthplace_LatLng"  
+					 ex:center="52.3555177,-1.1743197" 
+                     ex:zoom="2" 
+					 ex:colorKey=".Country"
+					 ex:colorCoder="Country-colors">
+                     
+        	<div ex:role="lens">
+ 				<b ex:content=".label"></b>
+		        <p ex:content=".Country"></p>
+ 				<p ex:content=".description"></p><!-- This is a different bubble than the one that pops up the timeline view. Try updating it to list birth and death locations -->
+			</div>       
+		</div>
+		
+	</div>	
+	<center>
+	 <p>Inline comments updated by Mia, based on code and notes by <a href="http://www.briancroxall.net/">Brian Croxall</a>. 'View source' to see suggestions of ways to tweak the code on this page and learn more about programming in HTML, CSS and JavaScript.</p>
+	 <p>Powered by the <a href="http://www.simile-widgets.org/">SIMILE</a> project's <a href="http://www.simile-widgets.org/exhibit/">Exhibit</a> and <a href="http://www.simile-widgets.org/timeline/">Timeline</a> scripts.</p>
+	</center>
+    </td>
+	<td width="20%">
+		<!-- This line creates the text search box. By default, it's set to search the whole spreadsheet but you can configure it to only search some sections. -->
+		<div ex:role="facet" ex:facetClass="TextSearch" ex:facetLabel="Search"></div>
+
+		<!-- These bits set up the 'faceted' filters on the right-hand side of the page - selecting one limits the 	display on the page to spreadsheet rows that match e.g. the same discipline or country.  If you want to add more filters (AKA facets), just copy a row and replace the value in 'ex:expression' e.g. 'Discipline' with the name of the spreadsheet column you want people to be able to filter on. If you want to label the box differently to the spreadsheet, just change the value of 'ex:facetLabel'. -->
+		<div ex:role="facet" ex:expression=".Discipline" ex:facetLabel="Discipline"></div>
+		<div ex:role="facet" ex:expression=".Country" ex:facetLabel="Country"></div>
+	</td>
+	</tr>
+</table>		
+		
+</body>
+</html>
